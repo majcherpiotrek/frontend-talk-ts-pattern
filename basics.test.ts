@@ -145,7 +145,9 @@ describe("Welcome to ts-pattern", () => {
                     .with("Dog", () => "Woof")
                     .with("Cat", () => "Meow")
                     .with("Bird", () => "Chirp")
-                    .exhaustive();
+                    .exhaustive(); // Error in compile time
+                    //.run(); // => Error in runtime
+                    // .otherwise(() => "I don't know"); // => Always handled, can turn up in tests
 
             expect(animalVoice("Dog")).toBe("Woof");
             expect(animalVoice("Cat")).toBe("Meow");
