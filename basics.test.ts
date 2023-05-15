@@ -1,7 +1,6 @@
 import { match, P } from "ts-pattern";
 
-describe("Welcome to ts-pattern", () => {
-    describe("Basics", () => {
+describe("Welcome to ts-pattern basics", () => {
         it("Let's match some literals", () => {
             type State =
                 | {
@@ -154,5 +153,4 @@ describe("Welcome to ts-pattern", () => {
             expect(animalVoice("Bird")).toBe("Chirp");
             // expect(animalVoice("Lion")).toBe("Roar"); // => Error
         });
-    });
 });
