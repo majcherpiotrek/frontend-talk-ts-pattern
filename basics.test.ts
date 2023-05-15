@@ -17,17 +17,27 @@ describe("Welcome to ts-pattern basics", () => {
                       };
                   };
 
-            const renderText = (state: State): string => {
-                // TODO refactor with ts-pattern
-                switch (state.name) {
-                    case "loading":
-                        return "Loading...";
-                    case "success":
-                        return state.data;
-                    case "error":
-                        return `An error occurred: ${state.error.message}`;
-                }
-            };
+            // const renderText = (state: State): string => {
+            //     // TODO refactor with ts-pattern
+            //     switch (state.name) {
+            //         case "loading":
+            //             return "Loading...";
+            //         case "success":
+            //             return state.data;
+            //         case "error":
+            //             return `An error occurred: ${state.error.message}`;
+            //     }
+            // };
+
+            const renderText = (state: State): string =>
+                match(state)
+                    .with({ name: "loading" }, () => "Loading...")
+                    .with({ name: "success" }, ({ data }) => data)
+                    .with(
+                        { name: "error" },
+                        ({ error }) => `An error occurred: ${error.message}`
+                    )
+                    .exhaustive();
 
             expect(renderText({ name: "loading" })).toBe("Loading...");
             expect(renderText({ name: "success", data: "Hello" })).toBe(
@@ -52,35 +62,66 @@ describe("Welcome to ts-pattern basics", () => {
                       error: unknown; // now let's imagine the error is unknown
                   };
 
-            const renderText = (state: State): string => {
-                // TODO refactor with ts-pattern
-                // P.string
-                // P.instanceOf
-                switch (state.name) {
-                    case "loading":
-                        return "Loading...";
-                    case "success":
-                        return state.data;
-                    case "error":
-                        if (typeof state.error === "string") {
-                            // 😕
-                            return `An error occurred: ${state.error}`;
-                        } else if (state.error instanceof Error) {
-                            // 😣
-                            return `An error occurred: ${state.error.message}`;
-                        } else if (
-                            (state.error as any)?.message &&
-                            typeof (state.error as any).message === "string"
-                        ) {
-                            // 😱
-                            return `An error occurred: ${
-                                (state.error as any).message
-                            }`;
-                        } else {
-                            return "An unknown error occurred";
-                        }
-                }
-            };
+            // const renderText = (state: State): string => {
+            //     // TODO refactor with ts-pattern
+            //     // P.string
+            //     // P.instanceOf
+            //     switch (state.name) {
+            //         case "loading":
+            //             return "Loading...";
+            //         case "success":
+            //             return state.data;
+            //         case "error":
+            //             if (typeof state.error === "string") {
+            //                 // 😕
+            //                 return `An error occurred: ${state.error}`;
+            //             } else if (state.error instanceof Error) {
+            //                 // 😣
+            //                 return `An error occurred: ${state.error.message}`;
+            //             } else if (
+            //                 (state.error as any)?.message &&
+            //                 typeof (state.error as any).message === "string"
+            //             ) {
+            //                 // 😱
+            //                 return `An error occurred: ${
+            //                     (state.error as any).message
+            //                 }`;
+            //             } else {
+            //                 return "An unknown error occurred";
+            //             }
+            //     }
+            // };
+
+            const renderText = (state: State): string => match(state)
+                .with({ name: "loading" }, () => "Loading...")
+                .with({ name: "success" }, ({ data }) => data)
+                .with(
+                    { name: "error", error: P.string },
+                    ({ error }) => `An error occurred: ${error}`
+                )
+                .with(
+                    { name: "error", error: P.instanceOf(Error) },
+                    ({ error }) => `An error occurred: ${error.message}`
+                )
+                .with(
+                    { name: "error", error: { message: P.string } },
+                    ({ error }) => `An error occurred: ${error.message}`
+                )
+                .otherwise(() => "An unknown error occurred");
+
+            // Actually we don't really need the instanceOf check, because we only care about the message
+            const renderText2 = (state: State): string => match(state)
+                .with({ name: "loading" }, () => "Loading...")
+                .with({ name: "success" }, ({ data }) => data)
+                .with(
+                    { name: "error", error: P.string },
+                    ({ error }) => `An error occurred: ${error}`
+                )
+                .with(
+                    { name: "error", error: { message: P.string} },
+                    ({ error }) => `An error occurred: ${error.message}`
+                )
+                .otherwise(() => "An unknown error occurred");
 
             expect(renderText({ name: "loading" })).toBe("Loading...");
             expect(renderText({ name: "success", data: "Hello" })).toBe(
